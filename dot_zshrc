@@ -131,12 +131,23 @@ source ~/.bash_profile
 eval "$(pyenv init -)"
 
 
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# Custom functions
+#. $(chezmoi source-path)/zsh/functions.sh
+
+# Misc
+alias wifip="ifconfig en0 | grep \"inet \""
+alias ethip="ifconfig en3 | grep \"inet \""
 
 # ls replacements
 alias la='exa --long --all --sort=modified --group-directories-first --git'
 alias ll='exa --long --sort=modified --group-directories-first --git'
+
+# fzf and bat preview
+alias fp="fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'"
+
+# git aliases
+alias gs="git status --porcelain"
 
