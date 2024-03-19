@@ -1,3 +1,12 @@
 syntax on
+filetype on
+filetype plugin on
+filetype indent on
 
+set nocompatible
+set mouse=a
+let mapleader=","
+set timeout timeoutlen=1500
+set backspace=2 " make backspace work like most other programs
+set number
 map q <Nop>
