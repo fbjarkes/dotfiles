@@ -1,0 +1,14 @@
+[user]
+	name = fbjarkes
+	email = xxxxx
+
+[core]
+	autocrlf = input
+	edtor = vim
+	excludesfile = /Users/fbjarkes/.gitignore_global
+
+#[pull]
+#	rebase = true
+
+[push]
+	autoSetupRemote = true
