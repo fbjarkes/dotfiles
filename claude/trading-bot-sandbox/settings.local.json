@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Write",
+      "Bash(uv run:*)",
+      "WebFetch(domain:data.alpaca.markets)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "filesystem": {
+      "allowWrite": [
+        "~/.cache/uv/"
+      ],
+      "allowRead": [
+        "~/git/tickers-db/db/sqlite/tickers.sqlite"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "data.alpaca.markets"
+      ]
+    }
+  }
+}
