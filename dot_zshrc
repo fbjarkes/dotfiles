@@ -142,8 +142,13 @@ alias wifip="ifconfig en0 | grep \"inet \""
 alias ethip="ifconfig en3 | grep \"inet \""
 
 # ls replacements
-alias la='exa --long --all --sort=modified --group-directories-first --git'
-alias ll='exa --long --sort=modified --group-directories-first --git'
+alias ll='eza -l --git --git-repos-no-status -s changed'
+alias la='eza -l --git --git-repos-no-status -s changed -a'
+
+# 
+alias ..='cd ../'
+alias ...='cd ../ ../'
+alias ~='cd ~/
 
 # fzf and bat preview
 alias fp="fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'"

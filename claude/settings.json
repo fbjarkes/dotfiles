@@ -10,12 +10,10 @@
       "WebFetch",
       "Bash(curl:*)",
       "Bash(wget:*)",
-      "Bash(ssh:*)"
+      "Bash(ssh:*)",
+      "Bash(git push:*)"
     ],
     "ask": [
-      "Bash(*)",
-      "Write(*)",
-      "Edit(*)"
     ]
   },
   "effortLevel": "medium"
