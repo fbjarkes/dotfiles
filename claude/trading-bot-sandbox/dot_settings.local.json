@@ -21,7 +21,8 @@
     },
     "network": {
       "allowedDomains": [
-        "data.alpaca.markets"
+        "data.alpaca.markets",
+	"localhost:7498"
       ]
     }
   }
