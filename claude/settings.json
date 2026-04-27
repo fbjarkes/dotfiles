@@ -11,7 +11,14 @@
       "Bash(curl:*)",
       "Bash(wget:*)",
       "Bash(ssh:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(git checkout --:*)",
+      "Bash(git restore .:*)",
+      "Bash(git branch -D:*)"
     ],
     "ask": [
     ]
