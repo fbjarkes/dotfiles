@@ -13,7 +13,8 @@
     "autoAllowBashIfSandboxed": true,
     "filesystem": {
       "allowWrite": [
-        "~/.cache/uv/"
+        "~/.cache/uv/",
+	"/home/fbjarkes/claude/trading-bot"
       ],
       "allowRead": [
         "~/git/tickers-db/db/sqlite/tickers.sqlite"
