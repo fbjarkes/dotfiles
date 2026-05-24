@@ -155,6 +155,7 @@ alias fp="fzf --preview 'bat --style=numbers --color=always --line-range :500 {}
 
 # git aliases
 alias gs="git status --porcelain"
+alias git-purge="git fetch --all --prune && echo '--- Branches with gone remotes ---' && git branch -vv | awk '/: gone]/{print \$1 \" (run: git branch -d \" \$1 \" to delete)\"}'"
 
 # tree with filesize
 alias tree="tree -sh"
