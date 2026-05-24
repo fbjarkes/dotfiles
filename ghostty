@@ -1,19 +1,9 @@
-##font-family = Commit Mono
-font-family = Ioskeley Mono
-font-size = 18
-
-adjust-cell-height = 35%
-mouse-hide-while-typing = true
+theme = Mirage
 mouse-scroll-multiplier = 2
-window-padding-balance = true
-window-save-state = always
-cursor-style = block
-shell-integration-features = no-cursor
-keybind = shift+enter=text:\x1b\r
+background-opacity = 0.8
+background-blur = 90
+background-blur-radius = 90
+unfocused-split-opacity = 0.6
 
+cursor-style = bar
 
-window-padding-x = 8
-window-padding-y = 8
-
-theme = Afterglow
-window-colorspace = display-p3
