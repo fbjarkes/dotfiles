@@ -160,3 +160,5 @@ alias git-purge="git fetch --all --prune && echo '--- Branches with gone remotes
 # tree with filesize
 alias tree="tree -sh"
 
+# 
+alias claude-sandbox="claude --settings .claude/sandbox.settings.json"
