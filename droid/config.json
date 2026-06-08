@@ -1,0 +1,238 @@
+
+{
+  "diffMode": "github",
+  "ideExtensionPromptedAt": {},
+  "ideActivationNudgedForVersion": {},
+  "enableCompletionBell": true,
+  "completionSound": "fx-ok01",
+  "awaitingInputSound": "fx-ack01",
+  "soundFocusMode": "always",
+  "commandAllowlist": [
+    "ls",
+    "pwd",
+    "dir",
+    "git status",
+    "git diff",
+    "git log",
+    "git show",
+    "git blame",
+    "git ls-files"
+  ],
+  "commandDenylist": [
+    "rm -rf /",
+    "rm -rf /*",
+    "rm -rf .",
+    "rm -rf ~",
+    "rm -rf ~/*",
+    "rm -rf $HOME",
+    "rm -r /",
+    "rm -r /*",
+    "rm -r ~",
+    "rm -r ~/*",
+    "mkfs",
+    "mkfs.ext4",
+    "mkfs.ext3",
+    "mkfs.vfat",
+    "mkfs.ntfs",
+    "dd if=/dev/zero of=/dev",
+    "dd of=/dev",
+    "shutdown",
+    "reboot",
+    "halt",
+    "poweroff",
+    "init 0",
+    "init 6",
+    ":(){ :|: & };:",
+    ":() { :|:& };:",
+    "chmod -R 777 /",
+    "chmod -R 000 /",
+    "chown -R",
+    "powershell Remove-Item -Recurse -Force",
+    "Format-Volume",
+    "format.com"
+  ],
+  "includeCoAuthoredByDroid": false,
+  "enableDroidShield": false,
+  "todoDisplayMode": "pinned",
+  "allowBackgroundProcesses": true,
+  "showThinkingInMainView": false,
+  "ideAutoConnect": false,
+  "showTokenUsageIndicator": true,
+  "enableWarmup": true,
+  "enableCustomDroids": true,
+  "enableReadinessReport": false,
+  "enableHooks": false,
+  "completionSoundFocusMode": "always",
+  "enableSkills": false,
+  "autonomyLevel": "auto-medium",
+  "specSaveEnabled": true,
+  "sessionDefaultSettings": {
+    "model": "custom:Kimi-K2.5-Turbo-[Fireworks]-13",
+    "reasoningEffort": "none",
+    "autonomyMode": "auto-high",
+    "specModeReasoningEffort": "none",
+    "specModeModel": "custom:Claude-Opus-4.6-Thinking-High-[GitHub-Copilot]-1"
+  },
+  "customModels": [
+    {
+      "model": "gpt-5.4(high)",
+      "id": "custom:GPT-5.4-Codex-High-[ChatGPT-Pro]-0",
+      "index": 0,
+      "baseUrl": "http://localhost:8317/v1",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "GPT-5.4 Codex High [ChatGPT Pro]",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "model": "claude-opus-4.6",
+      "id": "custom:Claude-Opus-4.6-Thinking-High-[GitHub-Copilot]-1",
+      "index": 1,
+      "baseUrl": "http://localhost:8317",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "Claude Opus 4.6 Thinking High [GitHub Copilot]",
+      "extraArgs": {
+        "thinking": {
+          "type": "adaptive"
+        },
+        "output_config": {
+          "effort": "high"
+        },
+        "max_tokens": 64000
+      },
+      "noImageSupport": false,
+      "provider": "anthropic"
+    },
+    {
+      "model": "hf:moonshotai/Kimi-K2.5",
+      "id": "custom:Kimi-K2.5-[Synthetic]-2",
+      "index": 2,
+      "baseUrl": "https://api.synthetic.new/openai/v1",
+      "apiKey": "SYNTHETIC_API_KEY",
+      "displayName": "Kimi K2.5 [Synthetic]",
+      "maxOutputTokens": 262144,
+      "noImageSupport": false,
+      "provider": "generic-chat-completion-api"
+    },
+    {
+      "model": "hf:nvidia/Kimi-K2.5-NVFP4",
+      "id": "custom:Kimi-K2.5-NVFP4-[Synthetic]-3",
+      "index": 3,
+      "baseUrl": "https://api.synthetic.new/openai/v1",
+      "apiKey": "SYNTHETIC_API_KEY",
+      "displayName": "Kimi K2.5 NVFP4 [Synthetic]",
+      "maxOutputTokens": 65536,
+      "noImageSupport": false,
+      "provider": "generic-chat-completion-api"
+    },
+    {
+      "model": "claude-opus-4.5",
+      "id": "custom:Claude-Opus-4.5-[GitHub-Copilot]-4",
+      "index": 4,
+      "baseUrl": "http://localhost:8317",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "Claude Opus 4.5 [GitHub Copilot]",
+      "noImageSupport": false,
+      "provider": "anthropic"
+    },
+    {
+      "model": "claude-sonnet-4.5",
+      "id": "custom:Claude-Sonnet-4.5-[GitHub-Copilot]-5",
+      "index": 5,
+      "baseUrl": "http://localhost:8317",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "Claude Sonnet 4.5 [GitHub Copilot]",
+      "noImageSupport": false,
+      "provider": "anthropic"
+    },
+    {
+      "model": "claude-haiku-4.5",
+      "id": "custom:Claude-Haiku-4.5-[GitHub-Copilot]-6",
+      "index": 6,
+      "baseUrl": "http://localhost:8317",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "Claude Haiku 4.5 [GitHub Copilot]",
+      "noImageSupport": false,
+      "provider": "anthropic"
+    },
+    {
+      "model": "gpt-5.4(xhigh)",
+      "id": "custom:GPT-5.4-Codex-XHigh-[ChatGPT-Pro]-7",
+      "index": 7,
+      "baseUrl": "http://localhost:8317/v1",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "GPT-5.4 Codex XHigh [ChatGPT Pro]",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "model": "gpt-5.4(medium)",
+      "id": "custom:GPT-5.4-Codex-Medium-[ChatGPT-Pro]-8",
+      "index": 8,
+      "baseUrl": "http://localhost:8317/v1",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "GPT-5.4 Codex Medium [ChatGPT Pro]",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "model": "gpt-5.4(low)",
+      "id": "custom:GPT-5.4-Codex-Low-[ChatGPT-Pro]-9",
+      "index": 9,
+      "baseUrl": "http://localhost:8317/v1",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "GPT-5.4 Codex Low [ChatGPT Pro]",
+      "noImageSupport": false,
+      "provider": "openai"
+    },
+    {
+      "model": "hf:zai-org/GLM-4.7",
+      "id": "custom:GLM-4.7-[Synthetic]-10",
+      "index": 10,
+      "baseUrl": "https://api.synthetic.new/openai/v1",
+      "apiKey": "SYNTHETIC_API_KEY",
+      "displayName": "GLM-4.7 [Synthetic]",
+      "maxOutputTokens": 65536,
+      "noImageSupport": true,
+      "provider": "generic-chat-completion-api"
+    },
+    {
+      "model": "hf:MiniMaxAI/MiniMax-M2.5",
+      "id": "custom:MiniMax-M2.5-[Synthetic]-11",
+      "index": 11,
+      "baseUrl": "https://api.synthetic.new/openai/v1",
+      "apiKey": "SYNTHETIC_API_KEY",
+      "displayName": "MiniMax M2.5 [Synthetic]",
+      "maxOutputTokens": 65536,
+      "noImageSupport": true,
+      "provider": "generic-chat-completion-api"
+    },
+    {
+      "model": "gpt-5.3-codex-spark",
+      "id": "custom:GPT-5.3-Codex-Spark-[ChatGPT-Pro]-12",
+      "index": 12,
+      "baseUrl": "http://localhost:8317/v1",
+      "apiKey": "CLI_PROXY_API_KEY",
+      "displayName": "GPT-5.3 Codex Spark [ChatGPT Pro]",
+      "noImageSupport": true,
+      "provider": "openai"
+    },
+    {
+      "model": "accounts/fireworks/routers/kimi-k2p5-turbo",
+      "id": "custom:Kimi-K2.5-Turbo-[Fireworks]-13",
+      "index": 13,
+      "baseUrl": "https://api.fireworks.ai/inference/v1",
+      "apiKey": "FIREWORKS_API_KEY",
+      "displayName": "Kimi K2.5 Turbo [Fireworks]",
+      "maxOutputTokens": 256000,
+      "noImageSupport": false,
+      "provider": "generic-chat-completion-api"
+    }
+  ],
+  "logoAnimation": "off",
+  "terminalColorMode": "light",
+  "enabledPlugins": {
+    "core@factory-plugins": true
+  },
+  "theme": "factory-light"
+ }
