@@ -1,14 +1,35 @@
 [user]
-	name = fbjarkes
-	email = xxxxx
-
+        name = fbjarkes
+        email = fbjarkes-github.q5706@aleeas.com
+[credential]
+        helper = store --file ~/.git-credentials
 [core]
-	autocrlf = input
-	edtor = vim
+        autocrlf = input
+        editor = nvim
 	excludesfile = /Users/fbjarkes/.gitignore_global
+        pager = delta
 
-#[pull]
-#	rebase = true
+[interactive]
+        diffFilter = delta --color-only
+
+[delta]
+        navigate = true        # use n/N to move between diff sections
+        dark = true
+        line-numbers = true
+        side-by-side = false   # set to true if you prefer side-by-side view
 
 [push]
-	autoSetupRemote = true
+        autosetupremote = true
+
+[alias]
+        g = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+        g-develop = log HEAD...develop --graph --oneline  --decorate --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+        pushf = push --force-with-lease --force-if-includes
+[diff]
+        tool = vimdiff
+
+[merge]
+        conflictstyle = zdiff3
+[rerere]
+        enabled = true
+

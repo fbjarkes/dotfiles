@@ -23,7 +23,8 @@
     "network": {
       "allowedDomains": [
         "data.alpaca.markets",
-	"localhost:7498"
+	"localhost:7498",
+	"github.com"
       ]
     }
   }
