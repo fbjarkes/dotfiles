@@ -28,6 +28,10 @@ Optional flags:
 
 - `--stale-days N` — inactivity threshold for flagging a PR as stale (default 30).
 - `--skip-ci` — skip CI lookups (faster; `ci.status` becomes `"skipped"`).
+- `--body-stale-days N` — how many days a PR's body can lag behind its latest
+  commit before being flagged stale (default 7).
+- `--skip-body-staleness` — skip the body-staleness check (one fewer `gh api
+  graphql` call; `body_staleness` becomes `{"skipped": true}`).
 
 Output is JSON on stdout: `{"default_branch": ..., "stale_threshold_days": ...,
 "prs": [...]}`. Each PR entry has `recommendation: {action, reason, steps}` —
@@ -58,6 +62,14 @@ If `duplicate_of` is non-empty for a PR, name the other PR(s) and mention
 whether the signal was title similarity, file overlap, or both — let the user
 make the close/keep call, don't pick for them.
 
+If `body_staleness.stale` is `true`, add a note under that PR regardless of
+which section it landed in — e.g. "description last edited N days before the
+latest commit, may not reflect current state". This isn't its own action
+bucket (an out-of-date body doesn't block a merge the way a conflict does);
+it's a heads-up so the user knows to skim the diff instead of trusting the
+description. Don't surface this note when `body_staleness` is `{"skipped":
+true}` or when `stale` is `false`.
+
 ## Gotchas
 
 - **`gh pr checks` / the REST check-runs endpoint often 403s** with
@@ -81,6 +93,13 @@ make the close/keep call, don't pick for them.
   failing CI isn't "needs-rebase" or "fix-ci" — it's just a draft, those
   signals don't matter until it's marked ready. The script checks draft+stale
   first, draft-not-stale second, before any other rule.
+- **`lastEditedAt` isn't in `gh`'s `--json` field list** for `pr list`/`pr
+  view` — only raw GraphQL exposes it, which is why the script issues one
+  `gh api graphql` call with a field alias per PR number (not one call per
+  PR) to fetch it for everyone in a single round trip. GitHub returns `null`
+  if the body was never edited after creation, so the script falls back to
+  `createdAt` in that case — an untouched body next to many post-creation
+  commits is exactly the case worth flagging, not a reason to skip it.
 
 ## Troubleshooting
 

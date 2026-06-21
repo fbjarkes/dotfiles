@@ -13,7 +13,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-PR_FIELDS = "number,title,headRefName,baseRefName,createdAt,updatedAt,isDraft,mergeable,reviewDecision,additions,deletions,changedFiles,author,url,files"
+PR_FIELDS = "number,title,headRefName,baseRefName,createdAt,updatedAt,isDraft,mergeable,reviewDecision,additions,deletions,changedFiles,author,url,files,commits"
 
 TITLE_NOISE_RE = re.compile(r"^\[?(wip|stacked)\]?\s*[:\-]?\s*", re.IGNORECASE)
 CONVENTIONAL_PREFIX_RE = re.compile(r"^(feat|fix|chore|docs|test|refactor|perf|build|ci)(\([^)]*\))?\s*:\s*", re.IGNORECASE)
@@ -41,6 +41,29 @@ def fetch_default_branch() -> str:
     raw = run_gh(["repo", "view", "--json", "defaultBranchRef"])
     data = json.loads(raw)
     return (data.get("defaultBranchRef") or {}).get("name", "main")
+
+
+def fetch_owner_repo() -> tuple[str, str]:
+    raw = run_gh(["repo", "view", "--json", "owner,name"])
+    data = json.loads(raw)
+    return data["owner"]["login"], data["name"]
+
+
+def fetch_last_edited_map(owner: str, repo: str, pr_numbers: list[int]) -> dict[int, str | None]:
+    """Body-edit timestamp per PR. `lastEditedAt` isn't in gh's --json field
+    list for pr/list/view (only raw GraphQL exposes it), so this issues one
+    batched query with a field alias per PR number instead of one gh call per
+    PR."""
+    if not pr_numbers:
+        return {}
+    aliases = "\n".join(f"pr{n}: pullRequest(number: {n}) {{ lastEditedAt }}" for n in pr_numbers)
+    query = f"query($owner: String!, $repo: String!) {{ repository(owner: $owner, name: $repo) {{ {aliases} }} }}"
+    try:
+        raw = run_gh(["api", "graphql", "-f", f"query={query}", "-F", f"owner={owner}", "-F", f"repo={repo}"])
+        repo_data = json.loads(raw)["data"]["repository"]
+        return {n: repo_data[f"pr{n}"]["lastEditedAt"] for n in pr_numbers}
+    except (RuntimeError, KeyError, TypeError):
+        return {n: None for n in pr_numbers}
 
 
 def fetch_ci_status(pr_number: int, head_branch: str) -> dict:
@@ -77,6 +100,30 @@ def fetch_ci_status(pr_number: int, head_branch: str) -> dict:
 def days_since(iso_ts: str, now: datetime) -> int:
     dt = datetime.fromisoformat(iso_ts.replace("Z", "+00:00"))
     return (now - dt).days
+
+
+def compute_body_staleness(pr: dict, last_edited_at: str | None, body_stale_days: int) -> dict:
+    """Flag a PR whose description hasn't been touched since well after the
+    latest commit landed. If the body was never edited, GitHub returns
+    lastEditedAt = null, so fall back to createdAt — an untouched body next to
+    many post-creation commits is exactly the case worth flagging."""
+    commits = pr.get("commits") or []
+    if not commits:
+        return {"last_edited_at": last_edited_at, "last_commit_at": None, "gap_days": None, "stale": False}
+
+    last_commit_at = max(c["committedDate"] for c in commits)
+    effective_edit_at = last_edited_at or pr["createdAt"]
+
+    edit_dt = datetime.fromisoformat(effective_edit_at.replace("Z", "+00:00"))
+    commit_dt = datetime.fromisoformat(last_commit_at.replace("Z", "+00:00"))
+    gap_days = (commit_dt - edit_dt).days
+
+    return {
+        "last_edited_at": last_edited_at,
+        "last_commit_at": last_commit_at,
+        "gap_days": gap_days,
+        "stale": gap_days >= body_stale_days,
+    }
 
 
 def find_stacked_on(pr: dict, head_branch_to_number: dict[str, int]) -> int | None:
@@ -176,6 +223,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--stale-days", type=int, default=30, help="Inactivity threshold (days) to flag a PR as stale")
     parser.add_argument("--skip-ci", action="store_true", help="Skip CI status lookups (faster, no extra gh calls)")
+    parser.add_argument("--body-stale-days", type=int, default=7, help="Days a PR body can lag behind its latest commit before being flagged stale")
+    parser.add_argument("--skip-body-staleness", action="store_true", help="Skip body-staleness check (saves one gh api graphql call)")
     args = parser.parse_args()
 
     now = datetime.now(timezone.utc)
@@ -193,6 +242,12 @@ def main() -> None:
     default_branch = fetch_default_branch()
     head_branch_to_number = {pr["headRefName"]: pr["number"] for pr in prs}
 
+    if args.skip_body_staleness:
+        last_edited_map: dict[int, str | None] = {pr["number"]: None for pr in prs}
+    else:
+        owner, repo = fetch_owner_repo()
+        last_edited_map = fetch_last_edited_map(owner, repo, [pr["number"] for pr in prs])
+
     stacked_pairs: set[tuple[int, int]] = set()
     for pr in prs:
         stacked_on = find_stacked_on(pr, head_branch_to_number)
@@ -208,6 +263,10 @@ def main() -> None:
         ci = {"status": "skipped", "source": "skipped"} if args.skip_ci else fetch_ci_status(pr["number"], pr["headRefName"])
         stacked_on = find_stacked_on(pr, head_branch_to_number)
         dup_of = duplicates.get(pr["number"], [])
+        if args.skip_body_staleness:
+            body_staleness = {"skipped": True}
+        else:
+            body_staleness = compute_body_staleness(pr, last_edited_map.get(pr["number"]), args.body_stale_days)
 
         rec = recommend(pr, age_days, inactive_days, args.stale_days, ci, stacked_on, dup_of)
 
@@ -227,11 +286,22 @@ def main() -> None:
                 "ci": ci,
                 "stacked_on": stacked_on,
                 "duplicate_of": dup_of,
+                "body_staleness": body_staleness,
                 "recommendation": rec,
             }
         )
 
-    print(json.dumps({"default_branch": default_branch, "stale_threshold_days": args.stale_days, "prs": report}, indent=2))
+    print(
+        json.dumps(
+            {
+                "default_branch": default_branch,
+                "stale_threshold_days": args.stale_days,
+                "body_stale_threshold_days": args.body_stale_days,
+                "prs": report,
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":
