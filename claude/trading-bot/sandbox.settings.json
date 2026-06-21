@@ -14,7 +14,8 @@
       "filesystem": {
         "allowWrite": [
           "~/.cache/uv/",
-          "/home/fbjarkes/claude/trading-bot"
+          "/home/fbjarkes/claude/trading-bot",
+          "/tmp/"
         ],
         "allowRead": [
           "~/git/tickers-db/db/sqlite/tickers.sqlite"
