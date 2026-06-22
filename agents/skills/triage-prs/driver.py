@@ -7,6 +7,7 @@ turning the JSON into a markdown report and proposing (not executing) actions.
 """
 import argparse
 import difflib
+import html
 import json
 import re
 import subprocess
@@ -219,12 +220,100 @@ def recommend(pr: dict, age_days: int, inactive_days: int, stale_days: int, ci: 
     return {"action": "active", "reason": "Recently active, no signal to act on", "steps": []}
 
 
+HTML_SECTION_ORDER = [
+    ("Ready to Merge", ("ready-to-merge",)),
+    ("Needs Rebase", ("needs-rebase",)),
+    ("Fix CI", ("fix-ci",)),
+    ("Needs Author Response", ("needs-author-response",)),
+    ("Resolve Duplicate", ("resolve-duplicate",)),
+    ("Stale — Confirm or Close", ("stale-confirm-or-close", "close-or-confirm")),
+    ("Needs Review", ("needs-review",)),
+    ("Active / No Action", ("active", "no-action")),
+]
+
+HTML_STYLE = """
+body { font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+h1 { border-bottom: 2px solid #ddd; padding-bottom: .5rem; }
+h2 { margin-top: 2.5rem; border-bottom: 1px solid #eee; padding-bottom: .25rem; }
+h3 { margin-top: 1.5rem; margin-bottom: .25rem; }
+h3 a { text-decoration: none; }
+.meta { color: #666; font-size: .9em; margin: 0; }
+.reason { margin: .4rem 0; }
+.note { background: #fff8e1; border-left: 3px solid #f5c518; padding: .5rem .75rem; margin: .5rem 0; font-size: .9em; }
+pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: .75rem; overflow-x: auto; }
+code { font-family: ui-monospace, monospace; }
+"""
+
+
+def build_html_report(data: dict) -> str:
+    """Render the same grouping/notes rules the agent applies for markdown
+    (see SKILL.md 'Build the report') as a standalone HTML document."""
+    prs = data["prs"]
+    by_action: dict[str, list[dict]] = {}
+    for pr in prs:
+        by_action.setdefault(pr["recommendation"]["action"], []).append(pr)
+
+    handled_actions = {a for _, actions in HTML_SECTION_ORDER for a in actions}
+    leftover_actions = sorted(set(by_action) - handled_actions)
+    sections = list(HTML_SECTION_ORDER)
+    if leftover_actions:
+        sections.append(("Other", tuple(leftover_actions)))
+
+    body_parts = [f"<h1>PR Triage Report</h1>"]
+    body_parts.append(f'<p class="meta">Default branch: {html.escape(str(data.get("default_branch")))} &middot; '
+                       f'Stale threshold: {data.get("stale_threshold_days")}d</p>')
+
+    for heading, actions in sections:
+        section_prs = [pr for action in actions for pr in by_action.get(action, [])]
+        if not section_prs:
+            continue
+        body_parts.append(f"<h2>{html.escape(heading)}</h2>")
+        for pr in section_prs:
+            rec = pr["recommendation"]
+            title = html.escape(pr["title"])
+            url = html.escape(pr["url"])
+            author = html.escape(pr["author"])
+            body_parts.append(f'<h3>#{pr["number"]} <a href="{url}">{title}</a> ({author})</h3>')
+            body_parts.append(f'<p class="meta">Age: {pr["age_days"]}d &middot; Inactive: {pr["inactive_days"]}d</p>')
+            body_parts.append(f'<p class="reason">{html.escape(rec["reason"])}</p>')
+
+            if pr.get("stacked_on"):
+                body_parts.append(f'<p class="note">Stacked on #{pr["stacked_on"]} — wait for base to merge.</p>')
+
+            if pr.get("duplicate_of"):
+                others = ", ".join(f"#{d['number']}" for d in pr["duplicate_of"])
+                body_parts.append(f'<p class="note">Possible duplicate of {html.escape(others)} '
+                                   f"(title/file similarity) — confirm before closing either.</p>")
+
+            staleness = pr.get("body_staleness") or {}
+            if staleness.get("stale"):
+                body_parts.append(f'<p class="note">Description last edited {staleness["gap_days"]}d before the '
+                                   f"latest commit — may not reflect current state.</p>")
+
+            if rec["steps"]:
+                steps_text = html.escape("\n".join(rec["steps"]))
+                body_parts.append(f"<pre><code>{steps_text}</code></pre>")
+
+    return (
+        "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
+        f"<title>PR Triage Report</title>\n<style>{HTML_STYLE}</style>\n</head>\n<body>\n"
+        + "\n".join(body_parts)
+        + "\n</body>\n</html>\n"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--stale-days", type=int, default=30, help="Inactivity threshold (days) to flag a PR as stale")
     parser.add_argument("--skip-ci", action="store_true", help="Skip CI status lookups (faster, no extra gh calls)")
     parser.add_argument("--body-stale-days", type=int, default=7, help="Days a PR body can lag behind its latest commit before being flagged stale")
     parser.add_argument("--skip-body-staleness", action="store_true", help="Skip body-staleness check (saves one gh api graphql call)")
+    parser.add_argument("--format", choices=["markdown", "html"], default="markdown",
+                         help="Report format. 'markdown' (default) leaves report authoring to the calling agent, "
+                              "per SKILL.md. 'html' renders a standalone HTML report file deterministically.")
+    parser.add_argument("--output", default=None,
+                         help="Path to write the HTML report to (only used with --format html). "
+                              "Defaults to ./pr-triage-report.html")
     args = parser.parse_args()
 
     now = datetime.now(timezone.utc)
@@ -236,7 +325,7 @@ def main() -> None:
         sys.exit(1)
 
     if not prs:
-        print(json.dumps({"prs": [], "default_branch": None}))
+        print(json.dumps({"prs": [], "default_branch": None, "format": args.format, "report_file": None}))
         return
 
     default_branch = fetch_default_branch()
@@ -291,17 +380,22 @@ def main() -> None:
             }
         )
 
-    print(
-        json.dumps(
-            {
-                "default_branch": default_branch,
-                "stale_threshold_days": args.stale_days,
-                "body_stale_threshold_days": args.body_stale_days,
-                "prs": report,
-            },
-            indent=2,
-        )
-    )
+    data = {
+        "default_branch": default_branch,
+        "stale_threshold_days": args.stale_days,
+        "body_stale_threshold_days": args.body_stale_days,
+        "format": args.format,
+        "report_file": None,
+        "prs": report,
+    }
+
+    if args.format == "html":
+        output_path = args.output or "pr-triage-report.html"
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(build_html_report(data))
+        data["report_file"] = output_path
+
+    print(json.dumps(data, indent=2))
 
 
 if __name__ == "__main__":
