@@ -49,12 +49,21 @@ version.
 6. **Bump the version**: edit the version field directly (or use
    `bump-my-version`/`hatch version` if the project already has one
    configured — check before introducing a new tool).
-7. **Update `CHANGELOG.md`**: add a `## [X.Y.Z] - YYYY-MM-DD` section.
+7. **Regenerate the lock file**: the project uses `uv`, so run
+   ```bash
+   uv lock
+   ```
+   to refresh `uv.lock`'s embedded project version. Without this, `uv.lock`
+   keeps the old version pinned for the project's own entry and drifts from
+   `pyproject.toml`. Confirm `uv.lock` shows as modified (`git status`) before
+   committing in step 9 — if it doesn't change, the version bump in step 6
+   didn't land where `uv` reads it from.
+8. **Update `CHANGELOG.md`**: add a `## [X.Y.Z] - YYYY-MM-DD` section.
    Group entries as Added / Changed / Fixed (skip empty groups). Keep bullets
    to 1–2 sentences, describe the user-visible behavior, not the
    implementation. Skip pure-internal refactors and test-only commits.
-8. **Commit the release** on `develop` — version bump and changelog land in a
-   single commit:
+9. **Commit the release** on `develop` — version bump, lock file, and
+   changelog land in a single commit:
    ```bash
    git add -A && git commit -m "chore(release): vX.Y.Z"
    ```
@@ -64,11 +73,11 @@ version.
    bundles. Use this form unless the user has an established convention
    already in their commit history; check `git log --oneline -20` first and
    match it if one exists.
-9. **Push `develop`** — `git push` is user-run, not agent-run (see Notes):
-   ```bash
-   git push origin develop
-   ```
-10. **Squash-merge into `main`** — do the checkout/fetch/squash/commit steps
+10. **Push `develop`** — `git push` is user-run, not agent-run (see Notes):
+    ```bash
+    git push origin develop
+    ```
+11. **Squash-merge into `main`** — do the checkout/fetch/squash/commit steps
     yourself, but leave the push to the user:
     ```bash
     git checkout main
@@ -84,15 +93,15 @@ version.
     `git merge --squash` stages develop's changes without committing or
     advancing `main`'s parent — `main`'s history stays linear, one commit per
     release, instead of inheriting every individual `develop` commit.
-11. **Tag the release** — create the tag locally, but the push is user-run:
+12. **Tag the release** — create the tag locally, but the push is user-run:
     ```bash
     git tag vX.Y.Z && git push origin vX.Y.Z
     ```
-12. **Return to `develop`** for continued work:
+13. **Return to `develop`** for continued work:
     ```bash
     git checkout develop
     ```
-13. **If a tag-triggered CI workflow exists** (e.g. publishing to PyPI or
+14. **If a tag-triggered CI workflow exists** (e.g. publishing to PyPI or
     deploying the bot), check its run status rather than assuming it
     succeeded:
     ```bash
