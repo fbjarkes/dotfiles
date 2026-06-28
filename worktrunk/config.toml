@@ -1,0 +1,7 @@
+# ...
+# Custom config
+worktree-path = ".worktrees/{{ branch | sanitize }}"
+
+# Project specific suggestions
+## Python
+pre-start = "uv sync --frozen"
