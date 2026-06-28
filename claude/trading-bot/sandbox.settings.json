@@ -15,6 +15,7 @@
         "allowWrite": [
           "~/.cache/uv/",
           "/home/fbjarkes/claude/trading-bot",
+          "/home/fbjarkes/claude/trading-bot/.worktrees/*/",
           "/tmp/"
         ],
         "allowRead": [
@@ -26,6 +27,8 @@
           "data.alpaca.markets",
           "localhost:7498",
           "github.com",
+          "*.github.com",
+          "*.githubusercontent.com",
           "pypi.org",
           "files.pythonhosted.org"
         ]
