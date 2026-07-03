@@ -5,6 +5,7 @@
         "Write",
         "Bash(uv run:*)",
         "Bash(gh:*)",
+        "Bash(grep:*)",
         "WebFetch(domain:data.alpaca.markets)"
       ],
       "defaultMode": "acceptEdits"
