@@ -163,3 +163,14 @@ alias tree="tree -sh"
 
 # 
 alias claude-sandbox="claude --settings .claude/sandbox.settings.json"
+
+# pbcopy alternative
+osc() {
+    local data
+    if [ -n "$1" ]; then
+        data=$(base64 -w0 "$1") || return 1
+    else
+        data=$(base64 -w0)
+    fi
+    printf "\033]52;c;%s\a" "$data"
+}
