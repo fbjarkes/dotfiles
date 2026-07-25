@@ -153,6 +153,9 @@ alias ~='cd ~/
 # fzf and bat preview
 alias fp="fzf --preview 'bat --style=numbers --color=always --line-range :500 {}'"
 
+# cat colorized CSV data (batcat instead of bat on Debian)
+alias bat="batcat -P --color=always"
+
 # git aliases
 alias gs="git status"
 alias gfap="git fetch --all --prune --verbose"
