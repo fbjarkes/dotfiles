@@ -7,7 +7,6 @@
       "Read(./**/credentials*)",
       "Read(./**/*.key)",
       "Read(./**/*.pem)",
-      "WebFetch",
       "Bash(curl:*)",
       "Bash(wget:*)",
       "Bash(ssh:*)",
@@ -21,6 +20,7 @@
       "Bash(git branch -D:*)"
     ],
     "ask": [
+        "WebFetch"
     ]
   },
   "effortLevel": "medium"
