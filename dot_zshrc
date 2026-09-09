@@ -167,7 +167,11 @@ alias tree="tree -sh"
 # 
 alias claude-sandbox="claude --settings .claude/sandbox.settings.json"
 
-# pbcopy alternative
+# pbcopy alternatives
+## Linux 
+alias pbcopy='xclip -selection clipboard'
+alias pbpaste='xclip -selection clipboard -o'
+## fallback hack
 osc() {
     local data
     if [ -n "$1" ]; then
@@ -177,3 +181,5 @@ osc() {
     fi
     printf "\033]52;c;%s\a" "$data"
 }
+
+
