@@ -1,7 +1,7 @@
 {
   "permissions": {
     "deny": [
-      "Read(./**/.env*)", 
+      "Read(./**/.env*)",
       "Read(./secrets/**)",
       "Read(./config/**)",
       "Read(./**/credentials*)",
@@ -17,11 +17,60 @@
       "Bash(git clean -fd:*)",
       "Bash(git checkout --:*)",
       "Bash(git restore .:*)",
-      "Bash(git branch -D:*)"
+      "Bash(git branch -D:*)",
+      "Bash(gh stack push:*)",
+      "Bash(gh stack submit:*)",
+      "Bash(gh stack sync:*)",
+      "Bash(gh stack merge:*)"
     ],
     "ask": [
-        "WebFetch"
+      "WebFetch"
+    ],
+    "defaultMode": "auto"
+  },
+  "model": "opus",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/home/fbjarkes/.claude/hooks/block-push.sh'",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/home/fbjarkes/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   },
-  "effortLevel": "medium"
+  "enableWorkflows": true,
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": false,
+    "cc-plugin-you-should-know@builtin": true
+  },
+  "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
+  "editorMode": "vim",
+  "verbose": true,
+  "switchModelsOnFlag": true,
+  "showTurnDuration": false,
+  "skipAutoPermissionPrompt": true
 }
